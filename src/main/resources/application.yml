@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: mediflow-backend
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mediflow}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:1234}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_batch_fetch_size: 50   # kills N+1 on lazy collections without custom fetch code
+  session:
+    timeout: 20m
+    jdbc:
+      initialize-schema: never         # schema is owned by Flyway (V2)
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+
+server:
+  forward-headers-strategy: native     # real client IP behind a proxy/LB
+  servlet:
+    session:
+      cookie:
+        name: SESSION
+        http-only: true
+        secure: ${COOKIE_SECURE:true}  # set COOKIE_SECURE=false only for plain-http local dev
+        same-site: strict
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+app:
+  security:
+    max-sessions: 3
+    lockout:
+      max-attempts: 5
+      base-duration: 1m
+      max-duration: 1h
+    bootstrap:
+      admin-username: admin
+      admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:mediflow@774466}   # first start only, when no users exist
